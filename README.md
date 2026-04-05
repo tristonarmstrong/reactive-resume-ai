@@ -55,9 +55,19 @@ Built with privacy as a core principle, Reactive Resume gives you complete owner
 - Full data export at any time
 - Delete your data permanently with one click
 
+**AI Features**
+
+- 🤖 **Job Tailoring** - AI-powered resume optimization for specific job descriptions
+  - Paste any job description to get tailored suggestions
+  - Toggle between Original and AI-Optimized views
+  - Non-destructive workflow - preview changes before applying
+  - Works with OpenAI, Anthropic, Google Gemini, and **local AI providers (Ollama, LM Studio)**
+  - Session-persisted - job description and suggestions survive page refreshes
+- Import resumes from PDF/DOCX using AI parsing
+- Smart keyword extraction for ATS optimization
+
 **Extras**
 
-- AI integration (OpenAI, Google Gemini, Anthropic Claude)
 - Multi-language support
 - Share resumes via unique links
 - Import from JSON Resume format
@@ -148,6 +158,62 @@ open http://localhost:3000
 [![Build with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/amruthpillai/reactive-resume)
 
 For detailed setup instructions, environment configuration, and self-hosting guides, see the [documentation](https://docs.rxresu.me).
+
+## AI Features
+
+Reactive Resume includes powerful AI features to help you optimize your resume for specific job opportunities.
+
+### Job Tailoring
+
+The Job Tailoring feature allows you to paste a job description and receive AI-generated suggestions to optimize your resume:
+
+1. Navigate to the **Job Tailoring** section in the resume builder sidebar
+2. Paste the job description
+3. Click "Generate Suggestions"
+4. Toggle between **Original** and **AI-Optimized** views to compare
+5. Apply suggestions when satisfied (or discard to keep original)
+
+**Key Features:**
+- Non-destructive workflow - preview before applying
+- Session persistence - survives page refreshes
+- ATS optimization - follows best practices for applicant tracking systems
+- Truthful AI - never invents facts or achievements
+
+### Supported AI Providers
+
+Configure your preferred AI provider in Settings → AI Integration:
+
+| Provider | Setup | Best For |
+|----------|-------|----------|
+| **OpenAI** | API key required | Best quality, requires internet |
+| **Anthropic Claude** | API key required | High-quality responses |
+| **Google Gemini** | API key required | Cost-effective option |
+| **Ollama** (local) | Ollama running locally | Free, 100% private |
+| **LM Studio** (local) | LM Studio running on network | Local AI with GUI |
+
+### Local AI Setup
+
+For complete privacy and zero API costs, run AI models locally:
+
+**Ollama:**
+```bash
+# Install Ollama and pull a model
+ollama pull llama3.2
+ollama serve
+```
+Then in Reactive Resume settings: Provider = Ollama, Model = llama3.2
+
+**LM Studio:**
+1. Download and install [LM Studio](https://lmstudio.ai)
+2. Load your preferred model
+3. Start the local server (default: port 1234)
+4. In Reactive Resume settings:
+   - Provider: OpenAI Compatible
+   - Base URL: `http://localhost:1234/v1` (or your network IP)
+   - API Key: any value (not validated)
+   - Model: name of loaded model
+
+**Note:** Local models (3B-8B parameters) work well but may produce slightly less refined output than cloud providers. Experiment with different models to find the best balance of quality and speed.
 
 ## Tech Stack
 

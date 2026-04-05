@@ -22,7 +22,7 @@ This project uses [Vite+](https://vite.dev/blog/announcing-viteplus), a unified 
 | Forms                | React Hook Form (+ Zod resolvers)                                        | https://react-hook-form.com        |
 | Rich text editor     | Tiptap                                                                   | https://tiptap.dev                 |
 | Validation           | Zod                                                                      | https://zod.dev                    |
-| AI                   | Vercel AI SDK (OpenAI, Anthropic, Google, Ollama providers)              | https://ai-sdk.dev                 |
+| AI                   | Vercel AI SDK (OpenAI, Anthropic, Google, Ollama, LM Studio providers)   | https://ai-sdk.dev                 |
 | MCP                  | Model Context Protocol SDK                                               | https://modelcontextprotocol.io    |
 | i18n                 | Lingui                                                                   | https://lingui.dev                 |
 | Animations           | Motion (Framer Motion)                                                   | https://motion.dev                 |
@@ -62,6 +62,36 @@ locales/          Lingui i18n message catalogs (47+ locales)
 - **oRPC API** (`/api/rpc/*`) — Type-safe RPC with routers for: `ai`, `auth`, `resume`, `storage`, `printer`, `jobs`, `statistics`, `flags`. Three procedure types: `publicProcedure`, `protectedProcedure`, `serverOnlyProcedure`.
 - **Better Auth API** (`/api/auth/*`) — OAuth, session management, social provider callbacks.
 - **MCP Server** (`/mcp/`) — Model Context Protocol with OAuth Bearer tokens and API key auth. Exposes resumes as resources and tools for resume CRUD.
+
+### Job Tailoring Feature
+
+The Job Tailoring feature provides AI-powered resume optimization:
+
+**Location:** `src/routes/builder/$resumeId/-sidebar/left/sections/job-tailoring.tsx`
+
+**How it works:**
+1. User enters a job description (stored in session-only state via `useResumeStore`)
+2. AI generates tailored suggestions using the `tailorResume` oRPC procedure
+3. Suggestions are displayed in a side-by-side comparison view
+4. User can toggle between Original and AI-Optimized versions
+5. Changes are applied only when the user clicks "Apply Changes"
+
+**Session Persistence:**
+- Job description and AI suggestions are persisted to localStorage
+- Key format: `job-tailoring:{resumeId}`
+- Automatically restored on page reload
+- Cleared when user applies or discards suggestions
+
+**AI Integration:**
+- Supports all Vercel AI SDK providers (OpenAI, Anthropic, Google, Ollama, LM Studio)
+- Uses plain text generation (not structured output) for maximum compatibility
+- Includes robust JSON parsing and transformation for local AI providers
+- System prompt enforces truthfulness - AI never invents facts or achievements
+
+**Key Files:**
+- `src/components/resume/store/resume.ts` — Store with session state and persistence
+- `src/integrations/orpc/services/ai.ts` — AI service with tailorResume function
+- `src/integrations/ai/prompts/tailor-system.md` — System prompt with ATS best practices
 
 ## Infrastructure Services
 
