@@ -17,6 +17,7 @@ type Props = React.ComponentProps<typeof AccordionContent> & {
 
 export function SectionBase({ type, className, ...props }: Props) {
   const section = useResumeStore((state) => {
+    if (type === "job-tailoring") return null;
     if (type === "basics") return state.resume.data.basics;
     if (type === "summary") return state.resume.data.summary;
     if (type === "picture") return state.resume.data.picture;
@@ -24,7 +25,7 @@ export function SectionBase({ type, className, ...props }: Props) {
     return state.resume.data.sections[type];
   });
 
-  const isHidden = "hidden" in section && section.hidden;
+  const isHidden = section && "hidden" in section && section.hidden;
   const collapsed = useSectionStore((state) => state.sections[type]?.collapsed ?? false);
   const toggleCollapsed = useSectionStore((state) => state.toggleCollapsed);
 
@@ -49,11 +50,11 @@ export function SectionBase({ type, className, ...props }: Props) {
           <div className="flex flex-1 items-center gap-x-4">
             {getSectionIcon(type)}
             <h2 className="line-clamp-1 text-2xl font-bold tracking-tight">
-              {("title" in section && section.title) || getSectionTitle(type)}
+              {(section && "title" in section && section.title) || getSectionTitle(type)}
             </h2>
           </div>
 
-          {!["picture", "basics", "custom"].includes(type) && (
+          {!["job-tailoring", "picture", "basics", "custom"].includes(type) && (
             <SectionDropdownMenu type={type as "summary" | SectionType} />
           )}
         </div>

@@ -18,6 +18,7 @@ import { CustomSectionBuilder } from "./sections/custom";
 import { EducationSectionBuilder } from "./sections/education";
 import { ExperienceSectionBuilder } from "./sections/experience";
 import { InterestsSectionBuilder } from "./sections/interests";
+import { JobTailoringSectionBuilder } from "./sections/job-tailoring";
 import { LanguagesSectionBuilder } from "./sections/languages";
 import { PictureSectionBuilder } from "./sections/picture";
 import { ProfilesSectionBuilder } from "./sections/profiles";
@@ -30,6 +31,7 @@ import { VolunteerSectionBuilder } from "./sections/volunteer";
 
 function getSectionComponent(type: LeftSidebarSection) {
   return match(type)
+    .with("job-tailoring", () => <JobTailoringSectionBuilder />)
     .with("picture", () => <PictureSectionBuilder />)
     .with("basics", () => <BasicsSectionBuilder />)
     .with("summary", () => <SummarySectionBuilder />)
