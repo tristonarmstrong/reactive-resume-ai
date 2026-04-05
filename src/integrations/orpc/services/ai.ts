@@ -6,7 +6,6 @@ import {
   convertToModelMessages,
   createGateway,
   generateText,
-  Output,
   stepCountIs,
   streamText,
   tool,
@@ -237,11 +236,10 @@ async function testConnection(input: TestConnectionInput): Promise<boolean> {
 
   const result = await generateText({
     model: getModel(input),
-    output: Output.choice({ options: [RESPONSE_OK] }),
-    messages: [{ role: "user", content: `Respond with "${RESPONSE_OK}"` }],
+    messages: [{ role: "user", content: `Respond with only "${RESPONSE_OK}" and nothing else.` }],
   });
 
-  return result.output === RESPONSE_OK;
+  return result.text.trim() === RESPONSE_OK;
 }
 
 type ParsePdfInput = z.infer<typeof aiCredentialsSchema> & {
@@ -372,21 +370,126 @@ async function tailorResume(input: TailorResumeInput): Promise<TailorOutput> {
 
   const result = await generateText({
     model,
-    output: Output.object({ schema: tailorOutputSchema }),
     messages: [
       { role: "system", content: systemPrompt },
       {
         role: "user",
-        content: `Please tailor this resume for the ${input.job.job_title} position at ${input.job.employer_name}. Optimize for ATS compatibility and relevance.`,
+        content: `Please tailor this resume for the ${input.job.job_title} position at ${input.job.employer_name}.
+
+CRITICAL CONSTRAINTS - DO NOT VIOLATE:
+1. ONLY use information explicitly stated in the resume - NEVER invent facts, numbers, or achievements
+2. NEVER add quantifiable metrics (%, $, timeframes, counts) unless they already exist in the original text
+3. Keep all dates, titles, company names, and factual data EXACTLY as written
+4. NEVER upgrade skill levels or add implied expertise - only use skills clearly demonstrated
+5. Your job is to reword and optimize existing content, not to add new accomplishments
+
+ATS BEST PRACTICES - FOLLOW THESE GUIDELINES:
+- Use bullet points (not paragraphs) for experience descriptions
+- Start bullets with strong action verbs that match the job description
+- Include 2-3 keywords from the job posting in each bullet
+- Place the most important keyword within the first 3-5 words
+- Use exact terminology from the job posting (e.g., if they say "React.js", use "React.js")
+- Include 3-5 bullets per role, keeping each to 1-2 lines
+- Include the target job title in the summary's first sentence
+- Include 4-6 relevant keywords naturally in the summary
+- Match the skills section to job requirements using exact terminology
+
+CONSISTENCY GUIDELINES:
+- Use the same action verbs for similar tasks across different roles
+- Apply keywords consistently throughout the document
+- Maintain a uniform writing style
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object. No markdown code blocks, no explanations, no additional text. The JSON must include all required fields: summary (with content), experiences (array), references (array), and skills (array with at least one skill).`,
       },
     ],
   });
 
-  if (result.output == null) {
-    throw new Error("AI returned no structured tailoring output.");
+  console.log("AI raw response:", result.text);
+
+  // Parse JSON from the response text (for providers that don't support structured output)
+  let jsonData: unknown;
+  try {
+    const text = result.text.trim();
+    // Try to extract JSON from markdown code blocks if present
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
+    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
+    console.log("Extracted JSON string:", jsonString);
+    const repaired = jsonrepair(jsonString);
+    console.log("Repaired JSON:", repaired);
+    jsonData = JSON.parse(repaired);
+    console.log("Parsed JSON data:", jsonData);
+  } catch (error) {
+    console.error("Failed to parse AI response as JSON:", result.text);
+    throw new Error("AI response could not be parsed as valid JSON. Please try again.");
   }
 
-  return tailorOutputSchema.parse(result.output);
+  // Transform response to match schema (handle various LLM output formats)
+  if (isObject(jsonData)) {
+    // Handle summary as string instead of object
+    if (typeof jsonData.summary === 'string') {
+      jsonData.summary = { content: jsonData.summary };
+    }
+    
+    // Handle missing summary object
+    if (!isObject(jsonData.summary)) {
+      jsonData.summary = { content: '' };
+    }
+    
+    // Handle missing experiences array
+    if (!Array.isArray(jsonData.experiences)) {
+      jsonData.experiences = [];
+    }
+    
+    // Handle missing references array  
+    if (!Array.isArray(jsonData.references)) {
+      jsonData.references = [];
+    }
+    
+    // Handle missing or invalid skills array
+    if (!Array.isArray(jsonData.skills) || jsonData.skills.length === 0) {
+      console.warn("AI returned no skills, using fallback");
+      jsonData.skills = [{
+        name: "General Skills",
+        keywords: ["Professional"],
+        proficiency: "Developer",
+        icon: "code",
+        isNew: false
+      }];
+    }
+    
+    // Handle skills with missing fields
+    if (Array.isArray(jsonData.skills)) {
+      jsonData.skills = jsonData.skills.map((skill: unknown) => {
+        if (isObject(skill)) {
+          return {
+            name: typeof skill.name === 'string' ? skill.name : 'Skill',
+            keywords: Array.isArray(skill.keywords) ? skill.keywords : ['Professional'],
+            proficiency: typeof skill.proficiency === 'string' ? skill.proficiency : 'Developer',
+            icon: typeof skill.icon === 'string' ? skill.icon : 'code',
+            isNew: typeof skill.isNew === 'boolean' ? skill.isNew : false
+          };
+        }
+        return {
+          name: 'Skill',
+          keywords: ['Professional'],
+          proficiency: 'Developer',
+          icon: 'code',
+          isNew: false
+        };
+      });
+    }
+  }
+
+  // Validate against schema with detailed error reporting
+  const validationResult = tailorOutputSchema.safeParse(jsonData);
+  if (!validationResult.success) {
+    console.error("Schema validation failed:", validationResult.error.issues);
+    const errorMessages = validationResult.error.issues.map((e) => `${String(e.path)}: ${e.message}`);
+    throw new Error(`Invalid response structure: ${errorMessages.join(', ')}`);
+  }
+
+  return validationResult.data;
 }
 
 export const aiService = {
