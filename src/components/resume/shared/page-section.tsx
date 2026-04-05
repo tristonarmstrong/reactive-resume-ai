@@ -3,7 +3,7 @@ import type { SectionItem, SectionType } from "@/schema/resume/data";
 import { getSectionTitle } from "@/utils/resume/section";
 import { cn } from "@/utils/style";
 
-import { useResumeStore } from "../store/resume";
+import { useActiveResumeSection } from "../store/resume";
 
 type PageSectionProps<T extends SectionType> = {
   type: T;
@@ -12,7 +12,7 @@ type PageSectionProps<T extends SectionType> = {
 };
 
 export function PageSection<T extends SectionType>({ type, className, children }: PageSectionProps<T>) {
-  const section = useResumeStore((state) => state.resume.data.sections[type]);
+  const section = useActiveResumeSection((data) => data.sections[type]);
 
   const items = section.items.filter((item) => !item.hidden);
 

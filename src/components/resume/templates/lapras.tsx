@@ -9,7 +9,7 @@ import { getSectionComponent } from "../shared/get-section-component";
 import { PageIcon } from "../shared/page-icon";
 import { PageLink } from "../shared/page-link";
 import { PagePicture } from "../shared/page-picture";
-import { useResumeStore } from "../store/resume";
+import { useActiveResumeSection } from "../store/resume";
 
 const sectionClassName = cn(
   // Container
@@ -29,8 +29,8 @@ export function LaprasTemplate({ pageIndex, pageLayout }: TemplateProps) {
   const isFirstPage = pageIndex === 0;
   const { main, sidebar, fullWidth } = pageLayout;
 
-  const containerBorderRadius = useResumeStore((state) => Math.min(state.resume.data.picture.borderRadius, 30));
-  const headingNegativeMargin = useResumeStore((state) => state.resume.data.metadata.typography.heading.fontSize + 6);
+  const containerBorderRadius = useActiveResumeSection((data) => Math.min(data.picture.borderRadius, 30));
+  const headingNegativeMargin = useActiveResumeSection((data) => data.metadata.typography.heading.fontSize + 6);
 
   const style = useMemo(() => {
     return {
@@ -66,7 +66,7 @@ export function LaprasTemplate({ pageIndex, pageLayout }: TemplateProps) {
 }
 
 function Header() {
-  const basics = useResumeStore((state) => state.resume.data.basics);
+  const basics = useActiveResumeSection((data) => data.basics);
 
   return (
     <div

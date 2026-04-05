@@ -3,14 +3,14 @@ import { getSectionTitle } from "@/utils/resume/section";
 import { stripHtml } from "@/utils/string";
 import { cn } from "@/utils/style";
 
-import { useResumeStore } from "../store/resume";
+import { useActiveResumeSection } from "../store/resume";
 
 type PageSummaryProps = {
   className?: string;
 };
 
 export function PageSummary({ className }: PageSummaryProps) {
-  const section = useResumeStore((state) => state.resume.data.summary);
+  const section = useActiveResumeSection((data) => data.summary);
 
   if (section.hidden || !stripHtml(section.content)) return null;
 

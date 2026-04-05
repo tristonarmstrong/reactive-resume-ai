@@ -1,10 +1,10 @@
 import { cn } from "@/utils/style";
 
-import { useResumeStore } from "../store/resume";
+import { useActiveResumeSection } from "../store/resume";
 
 export function PagePicture({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  const name = useResumeStore((state) => state.resume.data.basics.name);
-  const picture = useResumeStore((state) => state.resume.data.picture);
+  const name = useActiveResumeSection((data) => data.basics.name);
+  const picture = useActiveResumeSection((data) => data.picture);
 
   if (picture.url === "") return null;
 

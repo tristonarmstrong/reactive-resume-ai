@@ -8,7 +8,7 @@ import { getSectionComponent } from "../shared/get-section-component";
 import { PageIcon } from "../shared/page-icon";
 import { PageLink } from "../shared/page-link";
 import { PagePicture } from "../shared/page-picture";
-import { useResumeStore } from "../store/resume";
+import { useActiveResumeSection } from "../store/resume";
 
 const sectionClassName = cn(
   // Section Heading
@@ -72,7 +72,7 @@ export function PikachuTemplate({ pageIndex, pageLayout }: TemplateProps) {
 }
 
 function Header() {
-  const basics = useResumeStore((state) => state.resume.data.basics);
+  const basics = useActiveResumeSection((data) => data.basics);
 
   return (
     <div className="page-header w-full space-y-(--page-gap-y) rounded-(--picture-border-radius) bg-(--page-primary-color) px-(--page-margin-x) py-(--page-margin-y) text-(--page-background-color)">

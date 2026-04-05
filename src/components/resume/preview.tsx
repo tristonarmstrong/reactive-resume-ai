@@ -17,7 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useCSSVariables } from "./hooks/use-css-variables";
 import { useWebfonts } from "./hooks/use-webfonts";
 import styles from "./preview.module.css";
-import { useResumeStore } from "./store/resume";
+import { useActiveResumeSection } from "./store/resume";
 import { AzurillTemplate } from "./templates/azurill";
 import { BronzorTemplate } from "./templates/bronzor";
 import { ChikoritaTemplate } from "./templates/chikorita";
@@ -63,8 +63,8 @@ type Props = React.ComponentProps<"div"> & {
 };
 
 export const ResumePreview = ({ showPageNumbers = false, pageClassName, className, ...props }: Props) => {
-  const picture = useResumeStore((state) => state.resume.data.picture);
-  const metadata = useResumeStore((state) => state.resume.data.metadata);
+  const picture = useActiveResumeSection((data) => data.picture);
+  const metadata = useActiveResumeSection((data) => data.metadata);
 
   useWebfonts(metadata.typography);
   const style = useCSSVariables({ picture, metadata });
@@ -132,7 +132,7 @@ function PageContainer({ pageIndex, pageLayout, pageClassName, showPageNumbers =
   const pageRef = useRef<HTMLDivElement>(null);
   const [pageHeight, setPageHeight] = useState<number>(0);
 
-  const metadata = useResumeStore((state) => state.resume.data.metadata);
+  const metadata = useActiveResumeSection((data) => data.metadata);
 
   const pageNumber = useMemo(() => pageIndex + 1, [pageIndex]);
   const maxPageHeight = useMemo(() => pageDimensionsAsPixels[metadata.page.format].height, [metadata.page.format]);

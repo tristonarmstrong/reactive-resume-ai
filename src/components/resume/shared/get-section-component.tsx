@@ -11,7 +11,7 @@ import type {
 
 import { cn } from "@/utils/style";
 
-import { useResumeStore } from "../store/resume";
+import { useActiveResumeSection } from "../store/resume";
 import { AwardsItem } from "./items/awards-item";
 import { CertificationsItem } from "./items/certifications-item";
 import { CoverLetterItem } from "./items/cover-letter-item";
@@ -181,7 +181,7 @@ export function getSectionComponent(
     .otherwise(() => {
       // Custom section - render based on its type
       const CustomSectionComponent = ({ id }: SectionProps) => {
-        const customSection = useResumeStore((state) => state.resume.data.customSections.find((s) => s.id === id));
+        const customSection = useActiveResumeSection((data) => data.customSections.find((s) => s.id === id));
 
         if (!customSection) return null;
         if (customSection.hidden) return null;
